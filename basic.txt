@@ -3,3 +3,52 @@ MAC地址:
 25-47位 组织唯一标志符(organizationally unique identifier,OUI).OUI是由IEEE分配给每个组织.组织按高到低的顺序分配1个唯一的全局地址给每个网卡以保证不会有重复的编号. 
 第47位 individual/Group(I/G)位,当I/G位为0的时候,我们可以设想这个地址是MAC地址的实际地址可以出现在MAC头部信息;当I/G位为1的时候,我们可以设想它为广播或多播. 
 第46位 G/L位,也叫U/L位.当这个位为0的时候代表它是由IEEE分配的全局地址;当这个位为1的时候,代表本地管理地址 (例如在DECnet当中)
+
+CSMA/CD：载波监听多路访问/冲突检测(carrier scnse multiple access collision detect)
+
+网络层功能：
+1．路径选择与中继
+2．流量控制
+3．网络连接建立与管理
+
+接口下配置:
+arp timeout 1800 超时时间
+arp 172.21.5.131 0000.00a4.b74c snap  静态绑定
+clear arp-cache 清除缓存
+
+子网划分(subnetting)的优点:
+1.减少网络流量 
+2.提高网络性能 
+3.简化管理 
+4.易于扩大地理范围
+
+路由：
+1.静态路由   
+	1.ip route 192.168.1.0 255.255.255.224 192.168.1.193   -> 静态浮动路由 ip route 10.4.7.0 255.255.255.0 192.168.1.193 50(管理距离)
+	2.ip route 10.4.7.0 255.255.255.0 e0
+	3.ip classless 无类路由
+	4.ip subnet-zero 一位掩码
+2.默认路由
+3.动态路由
+	1.距离向量(distance vector)   RIP 和IGRP
+	2.链路状态(link state)  OSPF 
+	3.混合型(hybrid) EIGRP
+	
+路由查找顺序：
+1.主机地址
+2.子网
+3.汇总(summary)地址
+4.主网络号
+5.超网(supernet)
+6.默认(default)地址
+
+
+
+
+
+
+
+
+
+
+
