@@ -42,9 +42,12 @@ clear arp-cache 清除缓存
 5.超网(supernet)
 6.默认(default)地址
 
+fast switching:有cache。不必每次查路由
+Process Switching：每次查路由     no ip route-cache开启
 
+距离矢量路由协议：Distance-Vector Routing Protocols
 
-
+AFI 地址族标志:Address Family Identifier
 
 
 
