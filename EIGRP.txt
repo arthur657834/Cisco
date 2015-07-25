@@ -1,0 +1,110 @@
+协议号88
+组播地址224.0.0.10
+Smooth Round Trip Timer(SRTT) 从邻居处发送和接收包的平均回程时间.
+RTO(Retransmit Time Out) 路由器在重新传输包之前等待ACK的时间
+Feasible Distance(FD,可行距离):
+AD 邻居到目标网络的距离
+Feasible Condition(FC,可行条件):
+AD < FD => FC=ture
+Feasible Successor(FS,可行后继路由器):
+
+network 10.10.12.0 0.0.0.255
+network 10.0.0.0
+a) 如果使用了network 命令，并且没有添加反掩码，那么network 后的网络参数必须
+为有类主网，该台路由器上所有满足所指定的主类网络范围的接口将会被加入EIGRP 进程。
+b）如果使用了network 命令，并且添加了反掩码，那么network 后的网络参数和反掩
+码准确匹配的网络范围将和路由器上直连接口相互比较，满足该范围的被加入EIGRP 进程。
+
+
+Cisco的私有路由协议,综合了距离矢量和链路状态2者的优点:
+
+1.快速收敛:只宣告链路和链路状态,而不宣告路由,dual算法
+
+2.减少带宽占用:不作周期性的更新,它只在路由的路径和度发生变化以后做部分更新，只发送更新给需要该更新信息的路由器。
+bandwidth 10000      10000k
+ip bandwidth-percent eigrp 100 10    10%
+
+3.支持多种网络层协议 protocol-dependentmodules(PDMs)
+
+4.无缝连接数据链路层协议和拓扑结构 无需对2层协议配置
+
+5.安全性：MD5的方式进行加密验证
+
+维持3张表:neighbortable,topologytable和routingtable
+
+EIGRP Metric的5个标准
+1.带宽:10的7次方除以源和目标之间最低的带宽乘以256 
+2.延迟(delay):接口的累积延迟乘以256,单位是微秒 
+3.可靠性(reliability):根据keepalive而定的源和目的之间最不可靠的可靠度的值 
+4.负载(loading):根据包速率和接口配置带宽而定的源和目的之间最不差的负载的值 5.最大传输单元(MTU):路径中最小的MTU.MTU包含在EIGRP的路由更新里,但是一般不参与EIGRP度的运算
+
+metric=[K1*bandwidth+(K2*bandwidth)/(256–load)+K3*delay]*[K5/(reliability+K4)]
+
+EIGRP的Metric=256*IGRP的Metirc
+
+在某些情况下,RTP也可以使用无需确认的不可靠的发送,并且使用这种不可靠发送的packet中不包含序列号
+
+EIGRP Packet
+
+1. Hello packet:用来发现和恢复邻居,通过组播的方式发送,使用不可靠的发送   
+ip hello-interval eigrp {AS-number}{seconds}
+ip hold-time eigrp. {AS-number}{seconds}
+hold time为等待后续Hello包的最大时间,默认hold time是3倍于Hello包发送间隔的
+
+2. ACK(acknowledgement) packet:不包含数据(data)的Hello包,使用unicast的方式,不可靠的发送
+
+3. Update packet:传播路由更新信息,不定期的,通过可靠的方式发送(比如网络链路发生变化).当只有一台路由器需要路由更新时,update通过unicast的方式发送;当有多个路由器需要路由更新的时候,通过组播的方式发送
+
+4. Query(查询) & Reply(应答) packet:是DUAL finite state machine用来管理扩散计算用的,查询包可以是组播或unicast;应答包是通过unicast的方式发送,并且方式都是可靠的
+
+5. Request(请求) packet:最初是打算提供给路由服务器(server)使用的,但是从来没实现过
+
+RTP可靠传输协议
+如果packet通过可靠的组播方式发送出去,并且没有收到邻居反馈的ACK包,那么这个packet会再次以unicast的方式发送给那个未响应的邻居,虽然经过16次的重传unicast,仍然没有收到ACK包的话,那么这个邻居就宣告为无效
+
+7.6.1弥散更新算法简介 
+为了能够让DUAL正确的操作,低层协议必须满足以下几个条件: 
+1. 一个节点要在有限的时间里检测到新邻居的存在或和一个邻居的连接的丢失 
+2. 在链路上传输的所有信息必须在有限的时间里按正确的顺序收到 
+3. 所有的消息,包括链路cost的更改,链路故障,和新邻居的发现,都应该是在有限时间里,一个一个的依次处理 
+
+Cisco的EIGRP使用邻居的发现/恢复和RTP来确保上述前提条件
+
+接口下汇总路由
+ip summary-address eigrp 15 172.20.15.0 255.255.255.0
+
+EIGRP stub区域
+eigrp stub {receive-only|connected|static|summary}
+Receive-only: 禁止路由器同EIGRP-AS内任何路由器共享其路由，禁止发送任何类型路由 
+Connected: 允许EIGRP-stub区域发送直连路由,默认打开 
+Static: 允许EIGRP-stub区域发送静态路由 
+Summary: 允许EIGRP-stub区域发送汇总路由,默认打开
+
+关闭水平分割
+接口模式下使用no ip split-horizon eigrp 100来关闭
+
+修改接口的bandwidth和delay
+接口模式下使用
+Bandwidth 1544
+Delay 2000 单位微妙
+
+帧中继环境使用eigrp需要关闭水平分割，并设置正确的带宽
+
+记录EIGRP邻居变化
+eigrp log-neighbor-changes
+
+调整EIGRP更新信息
+ip hello-interval eigrp as_number seconds
+ip hold-interval eigrp as_number seconds
+
+使所有接口成为被动接口
+passive-interface default
+
+
+ip authentication mode eigrp 100 md5
+ip authentication key-chain eigrp 100 CCNA
+钥匙串的名称只是本地起效的，双方不需要一致，但钥匙编号和钥匙内容必须要一致！
+
+静态指定邻居
+neighbor 10.10.23.3 e0/0
+

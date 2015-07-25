@@ -1,0 +1,90 @@
+Hello协议的目的:
+1.用于发现邻居
+2.在成为邻居之前,必须对Hello包里的一些参数协商成功 
+3.Hello包在邻居之间扮演着keepalive的角色 
+4.允许邻居之间的双向通信 
+5.它在NBMA(Nonbroadcast Multi-access)网络上选举DR和BDR
+
+Cisco路由器上Hello包默认的发送间隔(HelloInterval)是10秒;NBMA网络是30秒 
+ip ospf hello-interval <seconds>
+ips ospf dead-interval <seconds>
+
+OSPF定义的5种网络类型: 
+1.点到点网络 
+目标地址使用的是224.0.0.5,这个组播地址称为AllSPFRouters
+
+2.广播型网络 
+DR/BDR的发送的OSPF包的目标地址为224.0.0.5,运载这些OSPF包的帧的目标MAC地址为0100.5E00.0005;
+除了DR/BDR以外的OSPF包的目标地址为224.0.0.6,这个地址叫AllDRouters
+
+3.NBMA网络 
+人工来指定邻居,OSPF包采用unicast的方式
+
+4.点到多点网络 
+不选举DR和BDR
+
+5.虚链接(virtual link)
+OSPF包是以unicast的方式发送
+
+area 0不能配置成特殊区域
+相邻区域 external routing capability 选项必须一致
+
+路由器默认的优先级是1优先级为0的话将不能选举为DR/BDR
+ip ospf priority
+
+DR 选举：网络优化的目的。产生类型2的LSA
+对于 OSPF的路由器ID（32bit）的选择，采用如下规则：
+a）如果存在命令router-id X.X.X.X，那么优先采用
+b）如果没有手工指定，那么选取IP 地址最高的环回口地址作为RID。即使该环回
+口并没有参与OSPF进程
+c） 如果没有环回口，那么选取IP 地址最高的物理接口地址作为RID。即使该物理
+接口没有参与OSPF进程，但一定要UP。
+RID 对于OSPF 非常重要，如果没有RID，OSPF 便无法正常运行。因此建议养成手工指定RID的习惯。
+
+要注意的是,当网络中已经选举了DR/BDR后,又出现了1台新的优先级更高的路由器,DR/BDR是不会重新选举的
+
+DR/BDR选举完成后,DRother只和DR/BDR形成邻接关系.所有的路由器将组播Hello包到AllSPFRouters地址224.0.0.5以便它们能跟踪其他邻居的信息,即DR将洪泛update packet到224.0.0.5;DRother只组播update packet到AllDRouter地址224.0.0.6,只有DR/BDR监听这个地址
+
+
+宣告有两种方式：
+1.在ospf进程中 network 1.1.1.0 0.0.0.255 area 0
+2.在接口上 ip ospf 1 area 0
+
+InfTransdelay:LSA通告从路由器接口发送后经历的时间，以Transmit Delay显示，缺省值为1sec
+ip ospf transmit-delay
+
+Cost:1到65535之间的一个整数,Cisco默认cost的算法是100000000/BW,BW为接口带宽.如果带宽大于100M的话,将产生1个小于1的小数,这是不允许的.因此从IOS版本11.2之后,可以使用命令ospf auto-cost reference-bandwidth 来修正这个问题,允许管理者更改缺省的参考带宽
+
+Poll interval:
+这个参数只用于NBMA网络,因为在NBMA网络中邻居无法自动发现.如果邻居状态是down,那么路由器将经PollInterval长的时间发送Hello包给这个状态为down的邻居
+
+邻接关系建立的4个阶段:
+1.邻居发现阶段 
+2.双向通信阶段：Hello报文都列出了对方的RID，则BC完成 
+3.数据库同步阶段： 
+4.完全邻接阶段: full adjacency
+
+OSPF路由器在完全邻接之前,所经过的几个状态:
+1.Down: 初始化状态 
+2.Attempt: 只适于NBMA网络,在NBMA网络中邻居是手动指定的,在该状态下,路由器将使用HelloInterval取代PollInterval来发送Hello包 
+3.Init: 表明在DeadInterval里收到了Hello包,但是2-Way通信仍然没有建立起来 
+4.two-way: 双向会话建立 
+5.ExStart: 信息交换初始状态,在这个状态下,本地路由器和邻居将建立Master/Slave关系,并确定DD Sequence Number,接口等级高的的成为Master 
+6.Exchange: 信息交换状态,本地路由器向邻居发送数据库描述包,并且会发送LSR用于 请求新的LSA 
+7.Loading: 信息加载状态,本地路由器向邻居发送LSR用于请求新的LSA 
+8.Full: 完全邻接状态,这种邻接出现在Router LSA和Network LSA中
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
