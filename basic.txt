@@ -1,8 +1,10 @@
-MAC地址:
+MAC(Media Access Control)地址:
 0 -24位 由厂家自己分配。 
 25-47位 组织唯一标志符(organizationally unique identifier,OUI).OUI是由IEEE分配给每个组织.组织按高到低的顺序分配1个唯一的全局地址给每个网卡以保证不会有重复的编号. 
 第47位 individual/Group(I/G)位,当I/G位为0的时候,我们可以设想这个地址是MAC地址的实际地址可以出现在MAC头部信息;当I/G位为1的时候,我们可以设想它为广播或多播. 
 第46位 G/L位,也叫U/L位.当这个位为0的时候代表它是由IEEE分配的全局地址;当这个位为1的时候,代表本地管理地址 (例如在DECnet当中)
+
+dhcp和Bootp区别：Bootp必须将硬件地址写入Bootp表才能分配
 
 CSMA/CD：载波监听多路访问/冲突检测(carrier scnse multiple access collision detect)
 
@@ -11,10 +13,16 @@ CSMA/CD：载波监听多路访问/冲突检测(carrier scnse multiple access co
 2．流量控制
 3．网络连接建立与管理
 
+表示层功能：
+提供多种功能用于应用层数据编码和转化，以确保以一个系统应用层发送的信息可以被另一个系统应用层识别
+
 接口下配置:
 arp timeout 1800 超时时间
 arp 172.21.5.131 0000.00a4.b74c snap  静态绑定
 clear arp-cache 清除缓存
+
+如果使用了ip subnet-zero命令，我们就可以使用仅1位的子网位了
+ip classless:告诉路由丢弃数据之前看一下是否有默认网关
 
 子网划分(subnetting)的优点:
 1.减少网络流量 
@@ -34,13 +42,23 @@ clear arp-cache 清除缓存
 	2.链路状态(link state)  OSPF 
 	3.混合型(hybrid) EIGRP
 	
-路由查找顺序：
+路由器在地址匹配过程中按最大程度进行匹配,地址按精确程度递减的排列,如下: 
 1.主机地址
 2.子网
 3.汇总(summary)地址
 4.主网络号
 5.超网(supernet)
 6.默认(default)地址
+
+AD:
+Connected interface 0 
+Static route 1 
+EIGRP 90 
+IGRP 100 
+OSPF 110 
+RIP 120 
+External EIGRP 170 
+Unknown 255 (this route will never be used)
 
 fast switching:有cache。不必每次查路由
 Process Switching：每次查路由     no ip route-cache开启

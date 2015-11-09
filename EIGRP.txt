@@ -31,6 +31,12 @@ ip bandwidth-percent eigrp 100 10    10%
 5.安全性：MD5的方式进行加密验证
 
 维持3张表:neighbortable,topologytable和routingtable
+EIGRP:
+1.neighbortable中的每个邻居都转发1份IP路由表的拷贝给它们的邻居 
+2.然后每个邻居把从它们自己的邻居处得来的路由表存储在自己的EIGRP拓扑数据库中 
+3.EIGRP检查拓扑数据库,然后选择出一条到达目的地的最佳路由 
+4.EIGRP从拓扑数据库中选择到达目的地的最佳的successorroutes,然后把它们放到路由表里.路由器为每种协议(比如IP,IPX)各自保持1张单独是路由表
+
 
 EIGRP Metric的5个标准
 1.带宽:10的7次方除以源和目标之间最低的带宽乘以256 
@@ -70,6 +76,8 @@ RTP可靠传输协议
 
 Cisco的EIGRP使用邻居的发现/恢复和RTP来确保上述前提条件
 
+如果一个IGRP和一个EIGRP进程拥有相同 process-id,那么它们将自动进行路由的重分布
+
 接口下汇总路由
 ip summary-address eigrp 15 172.20.15.0 255.255.255.0
 
@@ -100,6 +108,11 @@ ip hold-interval eigrp as_number seconds
 使所有接口成为被动接口
 passive-interface default
 
+修改管理距离
+distance [1-255] adjacent_nei_ip_addr wild_mask [acl 0~99]
+
+修改偏移量
+offset-list [acl0-99] {in|out} offset [metric] [interface]
 
 ip authentication mode eigrp 100 md5
 ip authentication key-chain eigrp 100 CCNA
