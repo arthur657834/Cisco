@@ -7,7 +7,7 @@ Hello协议的目的:
 
 Cisco路由器上Hello包默认的发送间隔(HelloInterval)是10秒;NBMA网络是30秒 
 ip ospf hello-interval <seconds>
-ips ospf dead-interval <seconds>
+ip ospf dead-interval <seconds>
 
 OSPF定义的5种网络类型: 
 1.点到点网络 
@@ -74,6 +74,22 @@ OSPF路由器在完全邻接之前,所经过的几个状态:
 7.Loading: 信息加载状态,本地路由器向邻居发送LSR用于请求新的LSA 
 8.Full: 完全邻接状态,这种邻接出现在Router LSA和Network LSA中
 
+1. Internal Router:内部路由器 
+2. ABR(Area Border Router):区域边界路由器 
+3. Backbone Router(BR):骨干路由器 
+4. ASBR(Autonomous System Boundary Router):自治系统边界路由器 虚链路(Virtual Link)
+
+类型1:Router LSA 
+类型2:Network LSA 
+类型3:Network Summary LSA 
+类型4:ASBR Summary LSA 
+类型5:AS External LSA 
+类型6:Group Membership LSA 
+类型7:NSSA External LSA 
+类型8:External Attributes LSA 
+类型9:Opaque LSA(link-local scope,) 
+类型10:Opaque LSA(area-local scope) 
+类型11:Opaque LSA(AS scope)
 
 
 
