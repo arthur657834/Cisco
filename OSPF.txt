@@ -80,19 +80,48 @@ OSPF路由器在完全邻接之前,所经过的几个状态:
 4. ASBR(Autonomous System Boundary Router):自治系统边界路由器 虚链路(Virtual Link)
 
 类型1:Router LSA 
+只在本区域内传播
+
 类型2:Network LSA 
+DR都会产生这种Network LSA
+
 类型3:Network Summary LSA 
+由ABR路由器始发，用于通告该区域外部的目的地址，
+
 类型4:ASBR Summary LSA 
+由ABR发出，ASBR汇总LSA除了所通告的目的地是一个ASBR而不是一个网络外，其他同NetworkSummary LSA
+
 类型5:AS External LSA 
+
 类型6:Group Membership LSA 
+发自 ASBR路由器，用来通告到达OSPF自主系统外部的目的地，或者OSPF自主系统那个外部的缺省路由的LSA
+
 类型7:NSSA External LSA 
+来自非完全Stub区域（not-so-stubby area）内ASBR路由器始发的LSA通告它只在NSSA区域内泛洪，这是与LSA-Type5的区别
+
 类型8:External Attributes LSA 
+
 类型9:Opaque LSA(link-local scope,) 
 类型10:Opaque LSA(area-local scope) 
 类型11:Opaque LSA(AS scope)
 
+show ip ospf border-routers
+i代表区域内路由， I代表区域间路由
 
+路由标记如下:
+1. O 区域内路由
+2. O IA 区域间路由
+3. O N1 O N2 Nssa区域通告的Type7LSA生成的路由
+4. O E1 O E2 外部路由 区别在于后者计算时会不必加上到达ASBR的Metric
 
+路由选择表的查找顺序
+1. 路由器读取目的地址，并查找路由表，选择和目的地址最长匹配的路由进行转发
+2. 如果存在2条相同的路由,查看管理距离
+3. 根据 O > O IA > O E1 > O E2 的优先级顺序转发
+4. 如果此时还存在等Cost路径，则作负载均衡转发
+OSPF默认 4条路径负载均衡， 可以通过 maximum-paths 6修改，最多6条路径负载均衡
+
+DDP(Database Description Packets)
 
 
 
