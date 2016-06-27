@@ -1,135 +1,121 @@
-Hello协议的目的:
-1.用于发现邻居
-2.在成为邻居之前,必须对Hello包里的一些参数协商成功 
-3.Hello包在邻居之间扮演着keepalive的角色 
-4.允许邻居之间的双向通信 
-5.它在NBMA(Nonbroadcast Multi-access)网络上选举DR和BDR
-
-Cisco路由器上Hello包默认的发送间隔(HelloInterval)是10秒;NBMA网络是30秒 
-ip ospf hello-interval <seconds>
-ip ospf dead-interval <seconds>
-
-OSPF定义的5种网络类型: 
-1.点到点网络 
-目标地址使用的是224.0.0.5,这个组播地址称为AllSPFRouters
-
-2.广播型网络 
-DR/BDR的发送的OSPF包的目标地址为224.0.0.5,运载这些OSPF包的帧的目标MAC地址为0100.5E00.0005;
-除了DR/BDR以外的OSPF包的目标地址为224.0.0.6,这个地址叫AllDRouters
-
-3.NBMA网络 
-人工来指定邻居,OSPF包采用unicast的方式
-
-4.点到多点网络 
-不选举DR和BDR
-
-5.虚链接(virtual link)
-OSPF包是以unicast的方式发送
-
-area 0不能配置成特殊区域
-相邻区域 external routing capability 选项必须一致
-
-路由器默认的优先级是1优先级为0的话将不能选举为DR/BDR
-ip ospf priority
-
-DR 选举：网络优化的目的。产生类型2的LSA
-对于 OSPF的路由器ID（32bit）的选择，采用如下规则：
-a）如果存在命令router-id X.X.X.X，那么优先采用
-b）如果没有手工指定，那么选取IP 地址最高的环回口地址作为RID。即使该环回
-口并没有参与OSPF进程
-c） 如果没有环回口，那么选取IP 地址最高的物理接口地址作为RID。即使该物理
-接口没有参与OSPF进程，但一定要UP。
-RID 对于OSPF 非常重要，如果没有RID，OSPF 便无法正常运行。因此建议养成手工指定RID的习惯。
-
-要注意的是,当网络中已经选举了DR/BDR后,又出现了1台新的优先级更高的路由器,DR/BDR是不会重新选举的
-
-DR/BDR选举完成后,DRother只和DR/BDR形成邻接关系.所有的路由器将组播Hello包到AllSPFRouters地址224.0.0.5以便它们能跟踪其他邻居的信息,即DR将洪泛update packet到224.0.0.5;DRother只组播update packet到AllDRouter地址224.0.0.6,只有DR/BDR监听这个地址
-
-
-宣告有两种方式：
-1.在ospf进程中 network 1.1.1.0 0.0.0.255 area 0
-2.在接口上 ip ospf 1 area 0
-
-InfTransdelay:LSA通告从路由器接口发送后经历的时间，以Transmit Delay显示，缺省值为1sec
-ip ospf transmit-delay
-
-Cost:1到65535之间的一个整数,Cisco默认cost的算法是100000000/BW,BW为接口带宽.如果带宽大于100M的话,将产生1个小于1的小数,这是不允许的.因此从IOS版本11.2之后,可以使用命令ospf auto-cost reference-bandwidth 来修正这个问题,允许管理者更改缺省的参考带宽
-
-Poll interval:
-这个参数只用于NBMA网络,因为在NBMA网络中邻居无法自动发现.如果邻居状态是down,那么路由器将经PollInterval长的时间发送Hello包给这个状态为down的邻居
-
-邻接关系建立的4个阶段:
-1.邻居发现阶段 
-2.双向通信阶段：Hello报文都列出了对方的RID，则BC完成 
-3.数据库同步阶段： 
-4.完全邻接阶段: full adjacency
-
-OSPF路由器在完全邻接之前,所经过的几个状态:
-1.Down: 初始化状态 
-2.Attempt: 只适于NBMA网络,在NBMA网络中邻居是手动指定的,在该状态下,路由器将使用HelloInterval取代PollInterval来发送Hello包 
-3.Init: 表明在DeadInterval里收到了Hello包,但是2-Way通信仍然没有建立起来 
-4.two-way: 双向会话建立 
-5.ExStart: 信息交换初始状态,在这个状态下,本地路由器和邻居将建立Master/Slave关系,并确定DD Sequence Number,接口等级高的的成为Master 
-6.Exchange: 信息交换状态,本地路由器向邻居发送数据库描述包,并且会发送LSR用于 请求新的LSA 
-7.Loading: 信息加载状态,本地路由器向邻居发送LSR用于请求新的LSA 
-8.Full: 完全邻接状态,这种邻接出现在Router LSA和Network LSA中
-
-1. Internal Router:内部路由器 
-2. ABR(Area Border Router):区域边界路由器 
-3. Backbone Router(BR):骨干路由器 
-4. ASBR(Autonomous System Boundary Router):自治系统边界路由器 虚链路(Virtual Link)
-
-类型1:Router LSA 
-只在本区域内传播
-
-类型2:Network LSA 
-DR都会产生这种Network LSA
-
-类型3:Network Summary LSA 
-由ABR路由器始发，用于通告该区域外部的目的地址，
-
-类型4:ASBR Summary LSA 
-由ABR发出，ASBR汇总LSA除了所通告的目的地是一个ASBR而不是一个网络外，其他同NetworkSummary LSA
-
-类型5:AS External LSA 
-
-类型6:Group Membership LSA 
-发自 ASBR路由器，用来通告到达OSPF自主系统外部的目的地，或者OSPF自主系统那个外部的缺省路由的LSA
-
-类型7:NSSA External LSA 
-来自非完全Stub区域（not-so-stubby area）内ASBR路由器始发的LSA通告它只在NSSA区域内泛洪，这是与LSA-Type5的区别
-
-类型8:External Attributes LSA 
-
-类型9:Opaque LSA(link-local scope,) 
-类型10:Opaque LSA(area-local scope) 
-类型11:Opaque LSA(AS scope)
-
-show ip ospf border-routers
-i代表区域内路由， I代表区域间路由
-
-路由标记如下:
-1. O 区域内路由
-2. O IA 区域间路由
-3. O N1 O N2 Nssa区域通告的Type7LSA生成的路由
-4. O E1 O E2 外部路由 区别在于后者计算时会不必加上到达ASBR的Metric
-
-路由选择表的查找顺序
-1. 路由器读取目的地址，并查找路由表，选择和目的地址最长匹配的路由进行转发
-2. 如果存在2条相同的路由,查看管理距离
-3. 根据 O > O IA > O E1 > O E2 的优先级顺序转发
-4. 如果此时还存在等Cost路径，则作负载均衡转发
-OSPF默认 4条路径负载均衡， 可以通过 maximum-paths 6修改，最多6条路径负载均衡
-
-DDP(Database Description Packets)
-
-
-
-
-
-
-
-
-
-
-
+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

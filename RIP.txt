@@ -1,85 +1,49 @@
-1.水平分割（split horizon）
-2.毒性逆转（poison reverse）  metric为16代表不可达。
-3.触发更新（trigger update）
-4.抑制计时（holddown timer）
-
-UDP端口520,RIP报文中路由条目最多为25条
-RIP定义了2种信息类型:Request message(请求信息)和Response message(应答信息). 
-请求信息 用来向邻居请求发送一个update(更新), 
-应答信息 运载着这个被请求的update.
-
-RIP计时器：
-1.Update timer
-update周期发送的时间间隔(即update timer)为25.5秒到30秒之间(随机),update的目标地址为255.255.255.255
-
-2.invalid timer
-180 秒
-
-3.flush timer
-Cisco 240秒  RFC 1058中规定的是300秒
-
-4.holddown timer
-180秒.如果新收到的路由条目的跳数大于本身条目的跳数,该路由将进入长为180秒的holddown状态
-
-passive-interface Ethernet0 不发送更新信息
-
-单播更新
-neighbor 172.17.1.2
-
-修改RIP的Metric值
-offset-list {access-list-number | name} {in| out} offset [type number]
-
-设置发送update的时间延迟
-output-delay {delay}  (默认为0ms,可以设置为8到50ms)
-
-RIP版本2
-
-RIPv2和RIPv1(RIP)相比,增加的特性有: 
-1.路由条目里包含了子网掩码的信息 
-2.路由条目包含了下一跳的地址信息 
-3.路由update包的验证 
-4.外部路由标签(tag) 
-5.通过multicast的方式发送update包 组播地址224.0.0.9 
-6.RIPv2是一种基于无类(classless)的路由协议 
-7.支持认证功能
-
-要恢复成RIP版本,在路由配置模式下使用no version即可
-
-关闭自动汇总:no auto-summary
-
-定义RIP消息版本
-ip rip send version 1 
-ip rip receive version 1
-ip rip send version 1 2
-
-关闭水平分割:
-接口模式下no ip split-horizon
-
-RIPv2认证模式
-key chain kaka
-key 1
-key-string mike
-
-接口模式下
-ip rip authentication key-chain kaka
-ip rip authentication mode md5
-
-
-例：
-key chain kaka 
-key 1 
-key-string mike 
-accept-lifetime 16:30:00 Nov 28 2004 duration 43200 (持续43200秒） 
-send-lifetime 16:30:00 Nov 28 2004 duration 43200 
-
-key 2 
-key-string mmike 
-accept-lifetime 04:00:00 Nov 29 2004 13:00:00 Apr 15 2005（到期时间） 
-send-lifetime 04:00:00 Nov 29 2004 13:00:00 Apr 15 2005 
-
-key 3 
-key-string mmmike 
-accept-lifetime 12:30:00 Apr 15 2005 infinite （永远） 
-send-lifetime 12:30:00 Apr 15 2005 infinite
-
-
+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
+46UyiWJ7o78gaTPBdpgUgw==
